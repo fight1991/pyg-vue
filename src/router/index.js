@@ -3,6 +3,8 @@ import Router from 'vue-router'
 import Login from '@/components/Login'
 import Home from '@/components/Home'
 import Users from '@/components/Users'
+import Roles from '@/components/Roles'
+import Rights from '@/components/Rights'
 Vue.use(Router)
 
 const router = new Router({
@@ -23,6 +25,14 @@ const router = new Router({
           // 当 /user/profile 匹配成功，
           path: '/users',
           component: Users
+        },
+        {
+          path: '/roles',
+          component: Roles
+        },
+        {
+          path: '/rights',
+          component: Rights
         }
       ]
     }

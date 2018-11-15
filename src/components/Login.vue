@@ -39,25 +39,23 @@ export default {
   methods: {
     login() {
       // 校验表单
-      this.$refs.form.validate(valid => {
+      this.$refs.form.validate(async valid => {
         if (valid) {
           // 发送请求
-          this.axios({
+          let { meta: { status }, data } = await this.axios({
             method: 'post',
             url: 'login',
             data: this.form
-          }).then(res => {
-            console.log(res.data)
-            if (res.data.meta.status === 200) {
-              this.$message.success('登陆成功')
-              // 本地存储token
-              localStorage.setItem('token', res.data.data.token)
-              // 跳转到首页
-              this.$router.push('/home')
-            } else {
-              this.$message.error('用户名或密码错误')
-            }
           })
+          if (status === 200) {
+            this.$message.success('登陆成功')
+            // 本地存储token
+            localStorage.setItem('token', data.token)
+            // 跳转到首页
+            this.$router.push('/home')
+          } else {
+            this.$message.error('用户名或密码错误')
+          }
         } else {
           return false
         }

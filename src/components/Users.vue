@@ -44,7 +44,7 @@
             <el-button type="primary" icon="el-icon-edit"  size="small" plain @click="editUser(scope.row.id)"></el-button>
             <el-button type="danger" icon="el-icon-delete" size="small"  plain @click="delUser(scope.row.id)"></el-button>
             <el-button type="success" icon="el-icon-check" size="small" @click="showRoles(scope.row)"  plain>分配角色</el-button>
-          </el-row>  
+          </el-row>
         </template>
       </el-table-column>
   </el-table>
@@ -166,34 +166,32 @@ export default {
       methods: 'get',
       url: `roles`
     }).then(res => {
-      console.log(res.data)
-      if (res.data.meta.status === 200) {
-        this.roleList = res.data.data
+      console.log(res)
+      if (res.meta.status === 200) {
+        this.roleList = res.data
       }
     })
   },
   methods: {
     // 状态改变
-    statusChange(info) {
+    async statusChange(info) {
       // 发送axios请求
-      console.log(info)
-      this.axios({
+      let { meta: { status }, data } = await this.axios({
         method: 'put',
         url: `users/${info.id}/state/${info.mg_state}`
-      }).then(res => {
-        if (res.data.meta.status === 200) {
-          if (res.data.data.mg_state === 1) {
-            this.$message.success('启用成功')
-          } else {
-            this.$message.warning('禁用成功')
-          }
-        }
       })
+      if (status === 200) {
+        if (data.mg_state === 1) {
+          this.$message.success('启用成功')
+        } else {
+          this.$message.warning('禁用成功')
+        }
+      }
     },
     // 渲染页面
-    render() {
+    async render() {
       // 页面加载时,发送请求,宣染导航
-      this.axios({
+      let { meta: { status }, data } = await this.axios({
         method: 'get',
         url: 'users',
         // axios中 get请求参数项为params
@@ -202,17 +200,14 @@ export default {
           pagenum: this.currentPage,
           pagesize: this.pageSize
         }
-      }).then(res => {
-        console.log(res.data)
-        if (res.data.meta.status === 200) {
-          this.userList = res.data.data.users
-          this.total = res.data.data.total
-          console.log(this.total)
-        } else {
-          this.$message.error('获取数据失败')
-          // this.$router.push('/home')
-        }
       })
+      if (status === 200) {
+        this.userList = data.users
+        this.total = data.total
+      } else {
+        this.$message.error('获取数据失败')
+        // this.$router.push('/home')
+      }
     },
     // 获取当前页码
     handleCurrentChange(page) {
@@ -226,35 +221,36 @@ export default {
     },
     // 搜索功能
     search() {
-      //从第一页开始显示
+      // 从第一页开始显示
       this.currentPage = 1
       this.render()
     },
     // 删除功能
-    delUser(id) {
-      this.$confirm('确认是否要删除吗', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      })
-        .then(() => {
-          //发送axios请求
-          this.axios({
-            method: 'delete',
-            url: `users/${id}`
-          }).then(res => {
-            if (res.data.meta.status === 200) {
-              this.$message('用户已删除')
-              if (this.userList.length == 1 && this.currentPage > 1) {
-                this.currentPage--
-              }
-              this.render()
-            }
-          })
+    async delUser(id) {
+      try {
+        await this.$confirm('确认是否要删除吗', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
         })
-        .catch(() => {
-          this.$message.error('取消删除')
+        // 发送axios请求
+        let { meta: { status } } = await this.axios({
+          method: 'delete',
+          url: `users/${id}`
         })
+        if (status === 200) {
+          this.$message('用户已删除')
+          if (this.userList.length === 1 && this.currentPage > 1) {
+            this.currentPage--
+          }
+          this.render()
+        }
+      } catch (e) {
+        this.$message.error('取消删除')
+      }
+      // .catch(() => {
+      //   this.$message.error('取消删除')
+      // })
     },
     // 点击添加用户按钮显示dialog框
     addBtn() {
@@ -265,25 +261,24 @@ export default {
     },
     // 设置dialog框中的添加用户功能
     addUser() {
-      this.$refs.form.validate(valid => {
+      this.$refs.form.validate(async valid => {
         if (valid) {
           // 发送axios请求
-          this.axios({
+          let { meta: { status } } = await this.axios({
             method: 'post',
             url: 'users',
             data: this.form
-          }).then(res => {
-            if (res.data.meta.status === 201) {
-              this.$message.success('添加成功')
-              // 清空表单内容,并关闭对话框
-              this.$refs.form.resetFields()
-              this.dialogFormVisible = false
-              // 重新渲染当前页
-              this.render()
-            } else {
-              this.$message.error('添加失败')
-            }
           })
+          if (status === 201) {
+            this.$message.success('添加成功')
+            // 清空表单内容,并关闭对话框
+            this.$refs.form.resetFields()
+            this.dialogFormVisible = false
+            // 重新渲染当前页
+            this.render()
+          } else {
+            this.$message.error('添加失败')
+          }
         } else {
           return false
         }
@@ -305,11 +300,11 @@ export default {
         method: 'get',
         url: `users/${id}`
       }).then(res => {
-        console.log(res.data)
+        console.log(res)
 
-        this.form.username = res.data.data.username
-        this.form.email = res.data.data.email
-        this.form.mobile = res.data.data.mobile
+        this.form.username = res.data.username
+        this.form.email = res.data.email
+        this.form.mobile = res.data.mobile
         // 数据改变 Dom 更新是异步的,所以掉用$nextTick方法
         this.$nextTick(() => {
           this.$refs.form.clearValidate()
@@ -326,8 +321,8 @@ export default {
           mobile: this.form.mobile
         }
       }).then(res => {
-        console.log(res.data)
-        if (res.data.meta.status === 200) {
+        console.log(res)
+        if (res.meta.status === 200) {
           this.$message.success('修改成功')
           this.render()
           this.dialogFormVisible = false
@@ -345,27 +340,25 @@ export default {
       this.id = info.id
     },
     // 分配角色
-    assignRoles() {
+    async assignRoles() {
       // 分配角色没选择时,代码不执行
-      if (this.form.roles.length == 0) {
+      if (this.form.roles.length === 0) {
         return
       }
-      this.axios({
+      let { meta: { status } } = await this.axios({
         url: `users/${this.id}/role`,
         method: 'put',
         data: {
           rid: this.form.roles
         }
-      }).then(res => {
-        console.log(res.data)
-        if (res.data.meta.status === 200) {
-          this.$message.success('分配角色成功')
-          //关闭分配对话框
-          this.this.dialogFormVisible1 = false
-        } else {
-          this.$message.error('分配失败')
-        }
       })
+      if (status === 200) {
+        this.$message.success('分配角色成功')
+        // 关闭分配对话框
+        this.this.dialogFormVisible1 = false
+      } else {
+        this.$message.error('分配失败')
+      }
     }
   }
 }

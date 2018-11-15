@@ -11,7 +11,9 @@
           <el-menu background-color="#545c64"
                    text-color="#fff"
                    active-text-color="#ffd04b"
-                   router>
+                   router
+                   unique-opened
+                   :default-active="$route.path.slice(1)">
             <el-submenu index="1">
               <template slot="title">
                 <i class="el-icon-location"></i>
@@ -29,8 +31,8 @@
                 <span>权限管理</span>
               </template>
               <el-menu-item-group>
-                <el-menu-item index="/roles"><i class="el-icon-menu"></i>角色列表</el-menu-item>
-                <el-menu-item index="/rights"><i class="el-icon-menu"></i>权限列表</el-menu-item>
+                <el-menu-item index="roles"><i class="el-icon-menu"></i>角色列表</el-menu-item>
+                <el-menu-item index="rights"><i class="el-icon-menu"></i>权限列表</el-menu-item>
               </el-menu-item-group>
             </el-submenu>
             <el-submenu index="3">
@@ -39,9 +41,9 @@
                 <span>商品管理</span>
               </template>
               <el-menu-item-group>
-                <el-menu-item index="/goods"><i class="el-icon-menu"></i>商品列表</el-menu-item>
+                <el-menu-item index="goods"><i class="el-icon-menu"></i>商品列表</el-menu-item>
                 <el-menu-item index="3-2"><i class="el-icon-menu"></i>分类参数</el-menu-item>
-                <el-menu-item index="/categories"><i class="el-icon-menu"></i>商品分类</el-menu-item>
+                <el-menu-item index="categories"><i class="el-icon-menu"></i>商品分类</el-menu-item>
               </el-menu-item-group>
             </el-submenu>
             <el-submenu index="4">
